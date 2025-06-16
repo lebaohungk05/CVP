@@ -218,5 +218,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
   git commit -m "Remove archive files from repo"
   git push
   ```
-- Đảm bảo file `.gitignore` đã có các dòng loại bỏ file nén, dữ liệu, cache.#   C V P  
- 
+- Đảm bảo file `.gitignore` đã có các dòng loại bỏ file nén, dữ liệu, cache.

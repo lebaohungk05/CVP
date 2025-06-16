@@ -1,0 +1,19 @@
+{
+    "name": "FER2013",
+    "train_samples": 28709,
+    "test_samples": 7178,
+    "image_size": [
+        48,
+        48
+    ],
+    "num_classes": 7,
+    "class_names": [
+        "Angry",
+        "Disgust",
+        "Fear",
+        "Happy",
+        "Sad",
+        "Surprise",
+        "Neutral"
+    ]
+}

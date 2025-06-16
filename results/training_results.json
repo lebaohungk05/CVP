@@ -1,0 +1,10 @@
+{
+    "training_time_seconds": 2554.035798,
+    "final_epoch": 46,
+    "early_stopping_epoch": null,
+    "final_learning_rate": 9.999999974752427e-07,
+    "test_accuracy": 0.48188909888267517,
+    "test_loss": 1.3500995635986328,
+    "best_val_accuracy": 0.4890282154083252,
+    "best_val_loss": 1.3389567136764526
+}
