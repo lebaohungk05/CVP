@@ -219,3 +219,83 @@ This project is licensed under the MIT License - see the LICENSE file for detail
   git push
   ```
 - Đảm bảo file `.gitignore` đã có các dòng loại bỏ file nén, dữ liệu, cache.
+
+# Emotion Detection Web Application
+
+A web application for real-time emotion detection using computer vision and deep learning.
+
+## Features
+
+- Real-time emotion detection using webcam
+- Upload images for emotion analysis
+- Beautiful and responsive UI
+- System information display
+- Support for 7 emotions: angry, disgust, fear, happy, sad, surprise, neutral
+
+## Setup
+
+1. Create a virtual environment (recommended):
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the application:
+```bash
+python app.py
+```
+
+4. Open your browser and navigate to:
+```
+http://localhost:5000
+```
+
+## Usage
+
+1. **Webcam Mode**:
+   - Click the "Capture" button to take a photo
+   - The application will analyze the emotion in real-time
+
+2. **Upload Mode**:
+   - Click "Upload Image" to select an image from your computer
+   - The application will analyze the emotion in the uploaded image
+
+3. **Results**:
+   - The predicted emotion will be displayed
+   - A bar chart shows the probability distribution across all emotions
+   - System information is displayed at the bottom of the page
+
+## Requirements
+
+- Python 3.7+
+- Webcam (for real-time detection)
+- Modern web browser with JavaScript enabled
+
+## Note
+
+Make sure to load your trained model in `app.py` by uncommenting and updating the model loading line:
+```python
+model = tf.keras.models.load_model('path_to_your_model')
+```
+
+## Project Structure
+
+```
+emotion-detection/
+├── app.py              # Main Flask application
+├── utils.py            # Utility functions
+├── requirements.txt    # Project dependencies
+├── templates/          # HTML templates
+│   └── index.html     # Main page template
+└── static/            # Static files (CSS, JS, images)
+    └── uploads/       # Uploaded images storage
+```
+
+## Contributing
+
+Feel free to submit issues and enhancement requests!

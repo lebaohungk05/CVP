@@ -1,113 +1,70 @@
 import os
 import numpy as np
-from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.layers import Dropout, BatchNormalization
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau, CSVLogger
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from model import create_emotion_model, save_model
-from utils import load_dataset, plot_training_history, get_system_info, print_system_info
-from analyze_results import analyze_training_results
-import tensorflow as tf
+from utils import load_dataset, plot_training_history, plot_confusion_matrix, save_training_report
+from sklearn.metrics import confusion_matrix, classification_report
+import pandas as pd
+import time
 import json
-from datetime import datetime
-import matplotlib.pyplot as plt
 
-# Enable memory growth for GPU if available
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-    try:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-    except RuntimeError as e:
-        print(e)
-
-def augment_data(image, label):
-    # Không augmentation, trả về ảnh gốc
-    return image, label
-
-def create_dataset(X, y, batch_size, augment=False):
+def train_model(data_dir, model_save_path, batch_size=8, epochs=50):  # Giảm batch size và epochs
     """
-    Create a tf.data.Dataset with optional augmentation
+    Train the emotion recognition model with optimized parameters for CPU
     """
-    dataset = tf.data.Dataset.from_tensor_slices((X, y))
-    
-    if augment:
-        dataset = dataset.map(augment_data, num_parallel_calls=tf.data.AUTOTUNE)
-    
-    dataset = dataset.shuffle(1000)
-    dataset = dataset.batch(batch_size)
-    dataset = dataset.prefetch(tf.data.AUTOTUNE)
-    
-    return dataset
-
-def plot_and_save_class_distribution(y, class_names, title, filename):
-    counts = np.sum(y, axis=0)
-    plt.figure(figsize=(8, 4))
-    plt.bar(class_names, counts)
-    plt.title(title)
-    plt.xlabel('Class')
-    plt.ylabel('Count')
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close()
-    print(f"{title}: {dict(zip(class_names, counts))}")
-
-def train_model(data_dir, model_save_path, batch_size=64, epochs=100):
-    """
-    Train the emotion recognition model with optimizations for laptop
-    """
-    # Print system information
-    print_system_info()
+    # Track training time
+    start_time = time.time()
     
     # Load and preprocess dataset
     print("Loading training dataset...")
     X_train, y_train = load_dataset(data_dir, mode='train')
+    
     print("Loading test dataset...")
     X_test, y_test = load_dataset(data_dir, mode='test')
-
-    class_names = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
-
-    # Calculate class weights
-    class_weights = {
-        0: 1.0,  # Angry
-        1: 7.0,  # Disgust (7178/111 ≈ 7)
-        2: 1.0,  # Fear
-        3: 0.4,  # Happy (7178/1774 ≈ 0.4)
-        4: 1.0,  # Sad
-        5: 1.0,  # Surprise
-        6: 1.0   # Neutral
-    }
-
-    # Stratified split for train/val
-    y_train_labels = np.argmax(y_train, axis=1)
-    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
-    for train_idx, val_idx in sss.split(X_train, y_train_labels):
-        X_tr, X_val = X_train[train_idx], X_train[val_idx]
-        y_tr, y_val = y_train[train_idx], y_train[val_idx]
-
-    # Plot and print class distributions
-    os.makedirs("results", exist_ok=True)
-    plot_and_save_class_distribution(y_tr, class_names, "Train Set Class Distribution", "results/train_class_dist.png")
-    plot_and_save_class_distribution(y_val, class_names, "Validation Set Class Distribution", "results/val_class_dist.png")
-    plot_and_save_class_distribution(y_test, class_names, "Test Set Class Distribution", "results/test_class_dist.png")
-
+    
+    # Split training data into train and validation sets
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
+    )
+    
     # Reshape data for CNN input
-    X_tr = X_tr.reshape(X_tr.shape[0], 48, 48, 1)
+    X_train = X_train.reshape(X_train.shape[0], 48, 48, 1)
     X_val = X_val.reshape(X_val.shape[0], 48, 48, 1)
     X_test = X_test.reshape(X_test.shape[0], 48, 48, 1)
-    X_tr = X_tr.astype('float32') / 255.0
-    X_val = X_val.astype('float32') / 255.0
-    X_test = X_test.astype('float32') / 255.0
-
-    # Create datasets
-    train_dataset = create_dataset(X_tr, y_tr, batch_size, augment=True)
-    val_dataset = create_dataset(X_val, y_val, batch_size, augment=False)
-    test_dataset = create_dataset(X_test, y_test, batch_size, augment=False)
     
-    # Create model with optimizations
-    print("Creating model...")
+    # Print dataset statistics
+    print(f"\nDataset Statistics:")
+    print(f"Training samples: {len(X_train)}")
+    print(f"Validation samples: {len(X_val)}")
+    print(f"Test samples: {len(X_test)}")
+    
+    # Create model
+    print("\nCreating model...")
     model = create_emotion_model()
     
-    # Define callbacks with optimized parameters
+    # Count parameters
+    trainable_params = sum([np.prod(w.shape) for w in model.trainable_weights])
+    non_trainable_params = sum([np.prod(w.shape) for w in model.non_trainable_weights])
+    print(f"Total parameters: {trainable_params + non_trainable_params:,}")
+    print(f"Trainable parameters: {trainable_params:,}")
+    print(f"Non-trainable parameters: {non_trainable_params:,}")
+    
+    # Simplified Data Augmentation
+    datagen = ImageDataGenerator(
+        rotation_range=10,        # Giảm từ 15 xuống 10
+        width_shift_range=0.1,    # Giảm từ 0.15 xuống 0.1
+        height_shift_range=0.1,   # Giảm từ 0.15 xuống 0.1
+        horizontal_flip=True,
+        zoom_range=0.1,          # Giảm từ 0.15 xuống 0.1
+        fill_mode='nearest'
+    )
+    
+    # Chỉ augment training data, không augment validation
+    datagen.fit(X_train)
+    
+    # Define callbacks with adjusted parameters
     callbacks = [
         ModelCheckpoint(
             model_save_path,
@@ -118,71 +75,130 @@ def train_model(data_dir, model_save_path, batch_size=64, epochs=100):
         ),
         EarlyStopping(
             monitor='val_loss',
-            patience=10,
+            patience=30,          # Tăng từ 20 lên 30
             verbose=1,
-            restore_best_weights=True
+            restore_best_weights=True,
+            min_delta=0.001
         ),
         ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.5,
-            patience=3,
-            min_lr=1e-6,
+            patience=15,          # Tăng từ 10 lên 15
+            min_lr=1e-7,
             verbose=1
-        )
+        ),
+        CSVLogger('models/training_log.csv')
     ]
     
-    # Train model with optimized parameters
-    print("Training model...")
-    start_time = datetime.now()
-    
+    # Train model với augmented data
+    print("\nTraining model with optimized parameters...")
     history = model.fit(
-        train_dataset,
+        datagen.flow(X_train, y_train, batch_size=batch_size),
+        steps_per_epoch=len(X_train) // batch_size,
         epochs=epochs,
-        validation_data=val_dataset,
-        callbacks=callbacks
+        validation_data=(X_val, y_val),
+        callbacks=callbacks,
+        verbose=1
     )
     
-    end_time = datetime.now()
-    training_time = (end_time - start_time).total_seconds()
+    # Calculate training time
+    training_time = time.time() - start_time
     
     # Evaluate on test set
-    print("\nEvaluating on test set...")
-    test_loss, test_accuracy = model.evaluate(test_dataset)
+    print("\n" + "="*50)
+    print("FINAL EVALUATION ON TEST SET")
+    print("="*50)
+    
+    test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
     print(f"Test accuracy: {test_accuracy:.4f}")
     print(f"Test loss: {test_loss:.4f}")
     
-    # Save training results
-    training_results = {
-        "training_time_seconds": training_time,
-        "final_epoch": len(history.history['loss']),
-        "early_stopping_epoch": len(history.history['loss']) if history.history['loss'][-1] == min(history.history['loss']) else None,
-        "final_learning_rate": float(model.optimizer.learning_rate.numpy()),
-        "test_accuracy": float(test_accuracy),
-        "test_loss": float(test_loss),
-        "best_val_accuracy": float(max(history.history['val_accuracy'])),
-        "best_val_loss": float(min(history.history['val_loss']))
+    # Predictions for detailed analysis
+    y_pred = model.predict(X_test, verbose=0)
+    y_pred_labels = np.argmax(y_pred, axis=1)
+    y_true_labels = np.argmax(y_test, axis=1)
+    
+    # Emotion labels
+    emotions = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
+    
+    # Confusion Matrix
+    cm = confusion_matrix(y_true_labels, y_pred_labels)
+    cm_df = pd.DataFrame(cm, index=emotions, columns=emotions)
+    print("\nConfusion Matrix:")
+    print(cm_df)
+    cm_df.to_csv("models/confusion_matrix_cnn.csv")
+    
+    # Classification Report
+    report = classification_report(y_true_labels, y_pred_labels, target_names=emotions, digits=4)
+    print("\nClassification Report:")
+    print(report)
+    
+    # Save detailed report
+    report_dict = classification_report(y_true_labels, y_pred_labels, target_names=emotions, output_dict=True)
+    
+    # Calculate per-class accuracy
+    per_class_accuracy = {}
+    for i, emotion in enumerate(emotions):
+        mask = y_true_labels == i
+        if np.sum(mask) > 0:
+            per_class_accuracy[emotion] = np.mean(y_pred_labels[mask] == i)
+    
+    # Save comprehensive results
+    results = {
+        'model_type': 'CNN',
+        'test_accuracy': float(test_accuracy),
+        'test_loss': float(test_loss),
+        'training_time_seconds': training_time,
+        'total_parameters': int(trainable_params + non_trainable_params),
+        'trainable_parameters': int(trainable_params),
+        'epochs_trained': len(history.history['loss']),
+        'batch_size': batch_size,
+        'learning_rate': 0.0001,
+        'per_class_accuracy': per_class_accuracy,
+        'classification_report': report_dict,
+        'confusion_matrix': cm.tolist(),
+        'dataset_info': {
+            'train_samples': len(X_train),
+            'val_samples': len(X_val),
+            'test_samples': len(X_test)
+        }
     }
     
-    with open("results/training_results.json", "w") as f:
-        json.dump(training_results, f, indent=4)
+    with open('models/cnn_results.json', 'w') as f:
+        json.dump(results, f, indent=4)
     
-    # Analyze and save results
-    print("\nAnalyzing and saving results...")
-    final_metrics = analyze_training_results(history, model, X_test, y_test)
+    with open('models/classification_report_cnn.txt', 'w') as f:
+        f.write(f"CNN Model - Classification Report\n")
+        f.write(f"Training Time: {training_time/60:.2f} minutes\n")
+        f.write(f"Total Parameters: {trainable_params:,}\n")
+        f.write(f"Test Accuracy: {test_accuracy:.4f}\n")
+        f.write("="*50 + "\n\n")
+        f.write(report)
+    
+    # Plot training history
+    plot_training_history(history, model_name='CNN')
+    
+    # Plot confusion matrix
+    plot_confusion_matrix(cm, emotions, 'CNN')
     
     # Save final model
     save_model(model, model_save_path)
     
-    return model, history, final_metrics
+    # Generate training report
+    save_training_report(history, results, 'CNN')
+    
+    print(f"\nTraining completed in {training_time/60:.2f} minutes")
+    
+    return model, history, results
 
 if __name__ == "__main__":
     # Define paths
-    DATA_DIR = "data"  # Path to directory containing train and test folders
-    MODEL_SAVE_PATH = "models/emotion_model.h5"
+    DATA_DIR = "data"
+    MODEL_SAVE_PATH = "models/emotion_model_cnn.h5"
     
     # Create directories if they don't exist
     os.makedirs("models", exist_ok=True)
-    os.makedirs("results", exist_ok=True)
+    os.makedirs("plots", exist_ok=True)
     
     # Train model
-    model, history, final_metrics = train_model(DATA_DIR, MODEL_SAVE_PATH) 
+    model, history, results = train_model(DATA_DIR, MODEL_SAVE_PATH) 
