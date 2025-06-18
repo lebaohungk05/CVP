@@ -1,10 +1,181 @@
 {
-    "training_time_seconds": 2554.035798,
-    "final_epoch": 46,
-    "early_stopping_epoch": null,
-    "final_learning_rate": 9.999999974752427e-07,
-    "test_accuracy": 0.48188909888267517,
-    "test_loss": 1.3500995635986328,
-    "best_val_accuracy": 0.4890282154083252,
-    "best_val_loss": 1.3389567136764526
+    "model_type": "CNN",
+    "test_accuracy": 0.6117302775382996,
+    "test_loss": 1.246611475944519,
+    "training_time_seconds": 2738.9918262958527,
+    "total_parameters": 618727,
+    "trainable_parameters": 617063,
+    "epochs_trained": 50,
+    "batch_size": 8,
+    "learning_rate": 0.0001,
+    "per_class_accuracy": {
+        "angry": 0.5991649269311065,
+        "disgust": 0.1981981981981982,
+        "fear": 0.2265625,
+        "happy": 0.8376550169109357,
+        "sad": 0.4458700882117081,
+        "surprise": 0.8014440433212996,
+        "neutral": 0.6934306569343066
+    },
+    "classification_report": {
+        "angry": {
+            "precision": 0.4868532654792197,
+            "recall": 0.5991649269311065,
+            "f1-score": 0.5372016846045858,
+            "support": 958.0
+        },
+        "disgust": {
+            "precision": 0.5,
+            "recall": 0.1981981981981982,
+            "f1-score": 0.2838709677419355,
+            "support": 111.0
+        },
+        "fear": {
+            "precision": 0.5178571428571429,
+            "recall": 0.2265625,
+            "f1-score": 0.31521739130434784,
+            "support": 1024.0
+        },
+        "happy": {
+            "precision": 0.8467236467236468,
+            "recall": 0.8376550169109357,
+            "f1-score": 0.842164919240578,
+            "support": 1774.0
+        },
+        "sad": {
+            "precision": 0.5036231884057971,
+            "recall": 0.4458700882117081,
+            "f1-score": 0.4729902169289664,
+            "support": 1247.0
+        },
+        "surprise": {
+            "precision": 0.6981132075471698,
+            "recall": 0.8014440433212996,
+            "f1-score": 0.746218487394958,
+            "support": 831.0
+        },
+        "neutral": {
+            "precision": 0.5047225501770957,
+            "recall": 0.6934306569343066,
+            "f1-score": 0.5842159207379569,
+            "support": 1233.0
+        },
+        "accuracy": 0.6117302869880189,
+        "macro avg": {
+            "precision": 0.5796990001700103,
+            "recall": 0.5431893472153649,
+            "f1-score": 0.5402685125647613,
+            "support": 7178.0
+        },
+        "weighted avg": {
+            "precision": 0.610859847824553,
+            "recall": 0.6117302869880189,
+            "f1-score": 0.5981048565762772,
+            "support": 7178.0
+        }
+    },
+    "confusion_matrix": [
+        [
+            574,
+            8,
+            40,
+            35,
+            114,
+            36,
+            151
+        ],
+        [
+            62,
+            22,
+            5,
+            4,
+            5,
+            5,
+            8
+        ],
+        [
+            188,
+            8,
+            232,
+            32,
+            235,
+            152,
+            177
+        ],
+        [
+            60,
+            1,
+            24,
+            1486,
+            34,
+            42,
+            127
+        ],
+        [
+            160,
+            2,
+            76,
+            88,
+            556,
+            25,
+            340
+        ],
+        [
+            43,
+            1,
+            40,
+            35,
+            10,
+            666,
+            36
+        ],
+        [
+            92,
+            2,
+            31,
+            75,
+            150,
+            28,
+            855
+        ]
+    ],
+    "dataset_info": {
+        "train_samples": 22967,
+        "val_samples": 5742,
+        "test_samples": 7178,
+        "class_distribution_train": {
+            "angry": 3196,
+            "disgust": 349,
+            "fear": 3277,
+            "happy": 5772,
+            "sad": 3864,
+            "surprise": 2537,
+            "neutral": 3972
+        },
+        "class_distribution_val": {
+            "angry": 799,
+            "disgust": 87,
+            "fear": 820,
+            "happy": 1443,
+            "sad": 966,
+            "surprise": 634,
+            "neutral": 993
+        },
+        "class_distribution_test": {
+            "angry": 958,
+            "disgust": 111,
+            "fear": 1024,
+            "happy": 1774,
+            "sad": 1247,
+            "surprise": 831,
+            "neutral": 1233
+        }
+    },
+    "system_info": {
+        "os": "Windows-11-10.0.26100-SP0",
+        "python_version": "3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]",
+        "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+        "ram_gb": 31.72,
+        "tensorflow_version": "2.19.0"
+    }
 }
