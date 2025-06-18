@@ -3,158 +3,693 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Detection</title>
+    <title>🎭 Emotion Recognition AI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            color: #333;
         }
-        .main-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
         }
-        .camera-container {
-            position: relative;
-            width: 100%;
-            max-width: 640px;
-            margin: 0 auto;
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
         }
+
+        .hero-section {
+            padding: 100px 0 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .user-welcome {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 40px 0;
+        }
+
+        .camera-section {
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
         #video {
             width: 100%;
-            border-radius: 10px;
-            margin-bottom: 1rem;
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px 0;
+            position: relative;
         }
-        #canvas {
-            display: none;
-        }
-        .btn-capture {
+
+        .video-overlay {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #007bff;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .emotion-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-capture:hover {
-            background-color: #0056b3;
-        }
-        .result-container {
-            margin-top: 2rem;
-            padding: 1rem;
+            padding: 10px 15px;
             border-radius: 10px;
-            background-color: #f8f9fa;
+            font-weight: 600;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
         }
+
+        .confidence-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .real-time-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--success-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .btn-custom {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            color: white;
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(45deg, var(--success-color), #20c997);
+        }
+
+        .btn-danger-custom {
+            background: linear-gradient(45deg, var(--danger-color), #e74c3c);
+        }
+
+        .btn-warning-custom {
+            background: linear-gradient(45deg, var(--warning-color), #f39c12);
+            color: #333;
+        }
+
+        .results-section {
+            padding: 40px;
+            background: white;
+        }
+
+        .emotion-result {
+            text-align: center;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .emotion-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .emotion-name {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .confidence-score {
+            font-size: 1.5rem;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .emotion-bars {
+            margin-top: 30px;
+        }
+
         .emotion-bar {
-            height: 25px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            margin-bottom: 0.5rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .emotion-bar-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .emotion-bar-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
             overflow: hidden;
         }
-        .emotion-fill {
+
+        .emotion-bar-fill {
             height: 100%;
-            background-color: #007bff;
-            transition: width 0.3s ease;
+            border-radius: 4px;
+            transition: width 0.8s ease;
         }
-        .system-info {
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 10px;
+
+        .real-time-stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .detection-stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .main-card {
+                margin: 20px 0;
+            }
+            
+            .camera-section, .results-section {
+                padding: 20px;
+            }
+        }
+
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
         }
     </style>
 </head>
 <body>
-    <div class="container main-container">
-        <h1 class="text-center mb-4">Emotion Detection</h1>
-        
-        <div class="row">
-            <div class="col-md-6">
-                <div class="camera-container">
-                    <video id="video" autoplay playsinline></video>
-                    <canvas id="canvas"></canvas>
-                    <button class="btn btn-capture" onclick="captureImage()">
-                        <i class="fas fa-camera"></i> Capture
-                    </button>
-                </div>
-                <div class="text-center mt-3">
-                    <input type="file" id="fileInput" accept="image/*" class="d-none">
-                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                        <i class="fas fa-upload"></i> Upload Image
-                    </button>
-                </div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-brain"></i> Emotion AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/detect">
+                            <i class="fas fa-camera"></i> Detect
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-chart-pie"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/dashboard">
+                                <i class="fas fa-chart-line"></i> My Statistics
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="user-welcome">
+                <i class="fas fa-user-circle"></i> Welcome back, <strong>{{ username }}</strong>!
+            </div>
+            <h1 class="hero-title">🎭 Real-Time Emotion Detection</h1>
+            <p class="hero-subtitle">Live emotion analysis using advanced AI technology</p>
+            <p class="lead">Continuous emotion recognition without manual capture</p>
             
-            <div class="col-md-6">
-                <div class="result-container">
-                    <h3>Analysis Results</h3>
-                    <div id="results">
-                        <p class="text-center">Capture or upload an image to see results</p>
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-custom mt-3" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </section>
+
+    <!-- Main Detection Section -->
+    <div class="container">
+        <div class="main-card">
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <h2 class="mb-4">
+                    <i class="fas fa-video"></i> Live Real-Time Analysis
+                </h2>
+                
+                <div style="position: relative; display: inline-block;">
+                    <video id="video" autoplay muted playsinline style="display: none;"></video>
+                    <div class="video-overlay">
+                        <div class="emotion-overlay" id="emotion-overlay" style="display: none;">
+                            <span id="current-emotion">-</span>
+                        </div>
+                        <div class="confidence-overlay" id="confidence-overlay" style="display: none;">
+                            <span id="current-confidence">0%</span>
+                        </div>
+                        <div class="real-time-indicator" id="real-time-indicator" style="display: none;">
+                            <i class="fas fa-circle"></i> LIVE
+                        </div>
                     </div>
                 </div>
                 
-                <div class="system-info">
-                    <h3>System Information</h3>
-                    <div id="systemInfo">
-                        Loading...
+                <canvas id="canvas" style="display: none;"></canvas>
+                
+                <div id="camera-placeholder" class="text-center py-5">
+                    <i class="fas fa-video feature-icon"></i>
+                    <p class="lead">Click "Start Real-Time Detection" to begin</p>
+                    <small class="text-muted">AI will continuously analyze your emotions</small>
+                </div>
+
+                <div class="controls mt-4">
+                    <button id="startRealTime" class="btn btn-success-custom">
+                        <i class="fas fa-play"></i> Start Real-Time Detection
+                    </button>
+                    <button id="pauseRealTime" class="btn btn-warning-custom" style="display: none;">
+                        <i class="fas fa-pause"></i> Pause Analysis
+                    </button>
+                    <button id="stopRealTime" class="btn btn-danger-custom" style="display: none;">
+                        <i class="fas fa-stop"></i> Stop Detection
+                    </button>
+                    <a href="/dashboard" class="btn btn-custom">
+                        <i class="fas fa-chart-pie"></i> View Dashboard
+                    </a>
+                </div>
+
+                <div class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Analyzing...</span>
+                    </div>
+                    <p class="mt-2">Analyzing emotion...</p>
+                </div>
+
+                <div id="error-message"></div>
+            </div>
+
+            <!-- Real-Time Results Section -->
+            <div id="realtime-results" class="results-section" style="display: none;">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-chart-line"></i> Live Emotion Analysis
+                </h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="current-result" class="emotion-result">
+                            <div class="emotion-icon" id="main-emotion-icon">🤔</div>
+                            <div class="emotion-name" id="main-emotion-name">Analyzing...</div>
+                            <div class="confidence-score" id="main-confidence-score">0%</div>
+                            <div class="mt-2">
+                                <small class="text-muted" id="detection-time">Starting analysis...</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="emotion-breakdown" class="emotion-bars">
+                            <h5 class="mb-3">
+                                <i class="fas fa-percentage"></i> Live Emotion Breakdown
+                            </h5>
+                            <!-- Emotion bars will be updated in real-time -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="real-time-stats">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h5 id="total-detections">0</h5>
+                            <small>Total Detections</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 id="session-duration">00:00</h5>
+                            <small>Session Duration</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 id="dominant-emotion">-</h5>
+                            <small>Dominant Emotion</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- User Statistics Section -->
+    <div class="container">
+        <div class="detection-stats">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <i class="fas fa-eye feature-icon"></i>
+                        <h4>Real-Time AI</h4>
+                        <p>Continuous emotion monitoring with live feedback</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h4>60.77% Accuracy</h4>
+                        <p>State-of-the-art CNN model with 617K parameters</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <h4>Auto-Save History</h4>
+                        <p>All detections automatically saved to your dashboard</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Emotion Recognition AI. Built with ❤️ and TensorFlow.</p>
+            <p>Logged in as: <strong>{{ username }}</strong> | Real-time analysis | 7 emotion classes</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Real-Time Detection Script -->
     <script>
-        // Initialize camera
-        async function initCamera() {
-            const video = document.getElementById('video');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startRealTime');
+        const pauseBtn = document.getElementById('pauseRealTime');
+        const stopBtn = document.getElementById('stopRealTime');
+        const placeholder = document.getElementById('camera-placeholder');
+        const loadingSpinner = document.querySelector('.loading-spinner');
+        const errorMessage = document.getElementById('error-message');
+        const realtimeResults = document.getElementById('realtime-results');
+
+        // Overlay elements
+        const emotionOverlay = document.getElementById('emotion-overlay');
+        const confidenceOverlay = document.getElementById('confidence-overlay');
+        const realtimeIndicator = document.getElementById('real-time-indicator');
+        const currentEmotion = document.getElementById('current-emotion');
+        const currentConfidence = document.getElementById('current-confidence');
+
+        // Result elements
+        const mainEmotionIcon = document.getElementById('main-emotion-icon');
+        const mainEmotionName = document.getElementById('main-emotion-name');
+        const mainConfidenceScore = document.getElementById('main-confidence-score');
+        const detectionTime = document.getElementById('detection-time');
+        const totalDetections = document.getElementById('total-detections');
+        const sessionDuration = document.getElementById('session-duration');
+        const dominantEmotion = document.getElementById('dominant-emotion');
+
+        let stream = null;
+        let analysisInterval = null;
+        let isAnalyzing = false;
+        let detectionCount = 0;
+        let sessionStart = null;
+        let emotionCounts = {};
+
+        // Emotion colors and icons
+        const emotionColors = {
+            'angry': '#FF6B6B',
+            'disgust': '#4ECDC4', 
+            'fear': '#45B7D1',
+            'happy': '#FFA07A',
+            'sad': '#98D8C8',
+            'surprise': '#F7DC6F',
+            'neutral': '#BB8FCE'
+        };
+
+        const emotionIcons = {
+            'angry': '😠',
+            'disgust': '🤢',
+            'fear': '😨',
+            'happy': '😊',
+            'sad': '😢',
+            'surprise': '😲',
+            'neutral': '😐'
+        };
+
+        // Start real-time detection
+        startBtn.addEventListener('click', async () => {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 640, 
+                        height: 480,
+                        facingMode: 'user'
+                    } 
+                });
                 video.srcObject = stream;
+                
+                video.style.display = 'block';
+                placeholder.style.display = 'none';
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'inline-block';
+                realtimeResults.style.display = 'block';
+                
+                // Show overlays
+                emotionOverlay.style.display = 'block';
+                confidenceOverlay.style.display = 'block';
+                realtimeIndicator.style.display = 'block';
+                
+                sessionStart = new Date();
+                startAnalysis();
+                updateSessionTimer();
+                
+                clearError();
             } catch (err) {
-                console.error("Error accessing camera:", err);
-            }
-        }
-
-        // Capture image from camera
-        function captureImage() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-            
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const imageData = canvas.toDataURL('image/jpeg');
-            analyzeImage(imageData);
-        }
-
-        // Handle file upload
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    analyzeImage(e.target.result);
-                };
-                reader.readAsDataURL(file);
+                showError('Unable to access camera. Please check permissions.');
+                console.error('Camera error:', err);
             }
         });
 
-        // Analyze image
-        async function analyzeImage(imageData) {
+        // Pause analysis
+        pauseBtn.addEventListener('click', () => {
+            if (isAnalyzing) {
+                stopAnalysis();
+                pauseBtn.innerHTML = '<i class="fas fa-play"></i> Resume Analysis';
+                realtimeIndicator.style.display = 'none';
+            } else {
+                startAnalysis();
+                pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause Analysis';
+                realtimeIndicator.style.display = 'block';
+            }
+        });
+
+        // Stop detection
+        stopBtn.addEventListener('click', () => {
+            stopAnalysis();
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            video.style.display = 'none';
+            placeholder.style.display = 'block';
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+            realtimeResults.style.display = 'none';
+            
+            // Hide overlays
+            emotionOverlay.style.display = 'none';
+            confidenceOverlay.style.display = 'none';
+            realtimeIndicator.style.display = 'none';
+            
+            // Reset stats
+            detectionCount = 0;
+            emotionCounts = {};
+            sessionStart = null;
+            
+            clearError();
+        });
+
+        // Start analysis loop
+        function startAnalysis() {
+            if (!isAnalyzing) {
+                isAnalyzing = true;
+                analysisInterval = setInterval(analyzeFrame, 2000); // Analyze every 2 seconds
+            }
+        }
+
+        // Stop analysis loop
+        function stopAnalysis() {
+            isAnalyzing = false;
+            if (analysisInterval) {
+                clearInterval(analysisInterval);
+                analysisInterval = null;
+            }
+        }
+
+        // Analyze current frame
+        function analyzeFrame() {
+            if (!isAnalyzing || !video.videoWidth || !video.videoHeight) return;
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+            analyzeEmotion(imageData);
+        }
+
+        // Analyze emotion
+        async function analyzeEmotion(imageData) {
             try {
                 const response = await fetch('/analyze', {
                     method: 'POST',
@@ -165,60 +700,121 @@
                 });
                 
                 const result = await response.json();
-                displayResults(result);
+                
+                if (result.success) {
+                    updateRealTimeDisplay(result);
+                    updateStats(result.predicted_emotion);
+                } else {
+                    console.warn('Analysis failed:', result.error);
+                }
             } catch (error) {
-                console.error('Error analyzing image:', error);
+                console.error('Analysis error:', error);
             }
         }
 
-        // Display results
-        function displayResults(result) {
-            const resultsDiv = document.getElementById('results');
-            let html = `<h4>Predicted Emotion: ${result.predicted_emotion}</h4>`;
+        // Update real-time display
+        function updateRealTimeDisplay(result) {
+            const emotion = result.predicted_emotion;
+            const confidence = result.confidence_percentage;
+            const color = result.color;
+            const icon = emotionIcons[emotion];
             
-            result.emotions.forEach((emotion, index) => {
-                const probability = result.probabilities[index] * 100;
-                html += `
-                    <div class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>${emotion}</span>
-                            <span>${probability.toFixed(1)}%</span>
+            // Update overlays
+            currentEmotion.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+            currentConfidence.textContent = confidence + '%';
+            emotionOverlay.style.background = `rgba(0, 0, 0, 0.8)`;
+            emotionOverlay.style.color = color;
+            
+            // Update main result
+            mainEmotionIcon.textContent = icon;
+            mainEmotionIcon.style.color = color;
+            mainEmotionName.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+            mainEmotionName.style.color = color;
+            mainConfidenceScore.textContent = `Confidence: ${confidence}%`;
+            detectionTime.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            
+            // Update emotion bars
+            updateEmotionBars(result.emotion_probabilities);
+        }
+
+        // Update emotion bars
+        function updateEmotionBars(emotionProbabilities) {
+            const emotionBreakdown = document.getElementById('emotion-breakdown');
+            
+            let barsHTML = '<h5 class="mb-3"><i class="fas fa-percentage"></i> Live Emotion Breakdown</h5>';
+            emotionProbabilities.forEach(item => {
+                const barColor = emotionColors[item.emotion];
+                barsHTML += `
+                    <div class="emotion-bar">
+                        <div class="emotion-bar-label">
+                            <span>
+                                ${emotionIcons[item.emotion]} 
+                                ${item.emotion.charAt(0).toUpperCase() + item.emotion.slice(1)}
+                            </span>
+                            <span style="color: ${barColor}; font-weight: 600;">
+                                ${item.percentage}%
+                            </span>
                         </div>
-                        <div class="emotion-bar">
-                            <div class="emotion-fill" style="width: ${probability}%"></div>
+                        <div class="emotion-bar-progress">
+                            <div class="emotion-bar-fill" 
+                                 style="width: ${item.percentage}%; background: ${barColor};">
+                            </div>
                         </div>
                     </div>
                 `;
             });
             
-            resultsDiv.innerHTML = html;
+            emotionBreakdown.innerHTML = barsHTML;
         }
 
-        // Load system information
-        async function loadSystemInfo() {
-            try {
-                const response = await fetch('/system-info');
-                const info = await response.json();
-                
-                const systemInfoDiv = document.getElementById('systemInfo');
-                systemInfoDiv.innerHTML = `
-                    <p><strong>OS:</strong> ${info.os.system} ${info.os.version}</p>
-                    <p><strong>CPU:</strong> ${info.cpu.processor}</p>
-                    <p><strong>Memory:</strong> ${info.memory.total} total, ${info.memory.available} available</p>
-                    <p><strong>GPU:</strong> ${info.gpu.available ? 'Available' : 'Not available'}</p>
-                    <p><strong>Python Version:</strong> ${info.python.version}</p>
-                    <p><strong>TensorFlow Version:</strong> ${info.tensorflow.version}</p>
-                `;
-            } catch (error) {
-                console.error('Error loading system info:', error);
+        // Update statistics
+        function updateStats(emotion) {
+            detectionCount++;
+            totalDetections.textContent = detectionCount;
+            
+            // Count emotions
+            emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+            
+            // Find dominant emotion
+            let maxCount = 0;
+            let dominant = '-';
+            for (const [emo, count] of Object.entries(emotionCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    dominant = emo;
+                }
             }
+            dominantEmotion.textContent = dominant.charAt(0).toUpperCase() + dominant.slice(1);
         }
 
-        // Initialize
-        window.onload = function() {
-            initCamera();
-            loadSystemInfo();
-        };
+        // Update session timer
+        function updateSessionTimer() {
+            if (!sessionStart) return;
+            
+            setInterval(() => {
+                if (!sessionStart) return;
+                
+                const now = new Date();
+                const diff = now - sessionStart;
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                sessionDuration.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.innerHTML = `
+                <div class="alert alert-danger alert-custom mt-3">
+                    <i class="fas fa-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+        }
+
+        // Clear error message
+        function clearError() {
+            errorMessage.innerHTML = '';
+        }
     </script>
 </body>
 </html> 

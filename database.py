@@ -31,6 +31,17 @@ def init_db():
     
     conn.commit()
     conn.close()
+    
+    # Create demo user if not exists
+    create_demo_user()
+
+def create_demo_user():
+    """Create a demo user for testing"""
+    try:
+        add_user('demo', 'demo123', 'demo@example.com')
+        print("✅ Demo user created: username='demo', password='demo123'")
+    except:
+        print("ℹ️ Demo user already exists")
 
 def add_user(username, password, email):
     conn = sqlite3.connect('emotion_app.db')
@@ -40,8 +51,10 @@ def add_user(username, password, email):
         c.execute('INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
                  (username, hashed_password, email))
         conn.commit()
+        print(f"✅ User '{username}' created successfully")
         return True
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as e:
+        print(f"❌ Error creating user '{username}': {e}")
         return False
     finally:
         conn.close()
@@ -54,8 +67,11 @@ def verify_user(username, password):
     conn.close()
     
     if user and check_password_hash(user[1], password):
+        print(f"✅ Login successful for user '{username}'")
         return user[0]  # Return user_id
-    return None
+    else:
+        print(f"❌ Login failed for user '{username}'")
+        return None
 
 def log_emotion(user_id, emotion, confidence):
     conn = sqlite3.connect('emotion_app.db')
@@ -65,11 +81,11 @@ def log_emotion(user_id, emotion, confidence):
     conn.commit()
     conn.close()
 
-def get_user_emotion_history(user_id, limit=10):
+def get_user_emotion_history(user_id, limit=50):
     conn = sqlite3.connect('emotion_app.db')
     c = conn.cursor()
     c.execute('''
-        SELECT emotion, confidence, timestamp 
+        SELECT user_id, emotion, confidence, timestamp 
         FROM emotion_logs 
         WHERE user_id = ? 
         ORDER BY timestamp DESC 
@@ -77,4 +93,22 @@ def get_user_emotion_history(user_id, limit=10):
     ''', (user_id, limit))
     history = c.fetchall()
     conn.close()
-    return history 
+    return history
+
+def get_all_users():
+    """Get all users for debugging"""
+    conn = sqlite3.connect('emotion_app.db')
+    c = conn.cursor()
+    c.execute('SELECT id, username, email, created_at FROM users')
+    users = c.fetchall()
+    conn.close()
+    return users
+
+def reset_database():
+    """Reset database for testing"""
+    import os
+    if os.path.exists('emotion_app.db'):
+        os.remove('emotion_app.db')
+        print("🗑️ Database reset")
+    init_db()
+    print("🆕 New database created with demo user") 
