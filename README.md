@@ -409,7 +409,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 🙏 Acknowledgments
 
-- **Prof. Phạm Tiến Lâm** for expert guidance and supervision
+- **Prof. Nguyễn Văn Tới** for expert guidance and supervision
 - **University of Science and Technology** for providing resources
 - **FER2013 dataset creators** for the foundational dataset
 - **Open-source community** for excellent libraries and tools:
