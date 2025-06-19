@@ -1,0 +1,26 @@
+services:
+  # Web Service - Flask Application
+  - type: web
+    name: emotion-recognition-app
+    runtime: python3
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.8.10
+      - key: PORT
+        value: 10000
+      - key: FLASK_APP
+        value: app.py
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///emotion_app.db
+    disk:
+      name: emotion-app-disk
+      mountPath: /opt/render/project/src
+      sizeGB: 1 
