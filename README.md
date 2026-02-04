@@ -506,17 +506,6 @@ Our CNN-based emotion recognition system demonstrates:
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- **Prof. Nguyễn Văn Tới** for expert guidance and supervision
-- **Phenikaa University** for providing resources and support
-- **FER2013 dataset creators** for the foundational dataset
-- **Render Platform** for free deployment hosting
-- **Open-source community** for excellent libraries and tools:
-  - TensorFlow/Keras team
-  - OpenCV contributors
-  - Flask development team
-  - Matplotlib and Seaborn developers
 
 ### References
 1. Goodfellow, I. et al. (2013). "Challenges in representation learning: A report on three machine learning contests."
