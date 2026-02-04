@@ -6,8 +6,6 @@
 ![Flask](https://img.shields.io/badge/Flask-2.0+-red.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**Đồ án môn học:** Thị giác máy tính-1-3-24(N03)  
-**Giảng viên hướng dẫn:** Nguyễn Văn Tới
 
 **Nhóm thực hiện:**
 - **Lê Bảo Hưng** (Trưởng nhóm) - [@lebaohungk05](https://github.com/lebaohungk05)
