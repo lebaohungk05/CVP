@@ -12,7 +12,7 @@
 **Nhóm thực hiện:**
 - **Lê Bảo Hưng** (Trưởng nhóm) - [@lebaohungk05](https://github.com/lebaohungk05)
 - **Nguyễn Văn Thái**
-- **Nguyễn Quang Hiệp**
+- **Hà Tài Thanh**
 
 ## 📋 Table of Contents
 - [Introduction](#-introduction)
